@@ -23,6 +23,11 @@ export default function Navbar() {
           <Button color="inherit" onClick={() => navigate('/manage-players')}>
             Manage Players
           </Button>
+          <Button color="inherit" onClick={() => navigate('/admin/spins')}>
+            Spin History
+          </Button>
+
+
         </Box>
       </Toolbar>
     </AppBar>

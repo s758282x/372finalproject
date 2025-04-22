@@ -6,6 +6,8 @@ import BetControls from "../components/BetControls";
 import PlacedBets from "../components/PlacedBets";
 import BettingGrid from "../components/BettingGrid";
 import Navbar from "../components/Navbar";
+import { getNumberColor } from "../utils/NumberColorUtil";
+
 
 // Define payout multipliers for different bet types
 const PAYOUTS = {
@@ -125,12 +127,12 @@ export default function Dashboard() {
   // Main spin logic: simulate a wheel spin, evaluate winnings, update state
   const spinWheel = () => {
     if (!placedBets.length || isSpinning) return;
-
+  
     setGameStage("spinning");
     setIsSpinning(true);
-
+  
     const totalBetAmount = placedBets.reduce((sum, bet) => sum + bet.amount, 0);
-
+  
     setTimeout(() => {
       const num = Math.floor(Math.random() * 37); // 0 to 36
       const color = getNumberColor(num);
@@ -139,34 +141,42 @@ export default function Dashboard() {
       setSpinHistory((h) => [result, ...h].slice(0, 10));
       setIsSpinning(false);
       setGameStage("result");
-
+  
+      // 👉 POST spin result to backend
+      fetch("http://localhost:5001/api/spins", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ result: `${num}` }) // send number only, as a string
+      })
+      .then(res => res.json())
+      .then(data => console.log("✅ Spin saved:", data))
+      .catch(err => console.error("❌ Error saving spin:", err));
+  
       let win = 0;
       const winners = [];
-
-      // Calculate winnings
+  
       placedBets.forEach((pb) => {
         if (isBetWinner(pb.bet, result)) {
           winners.push(pb.bet);
-          win += pb.amount * (getPayoutMultiplier(pb.bet) + 1); // +1 to include the original bet
+          win += pb.amount * (getPayoutMultiplier(pb.bet) + 1); // include original bet
         }
       });
-
+  
       setWinningBets(winners);
       setTotalWinnings(win);
-
-      // Update final balance
       setBalance((b) => b + win);
       setPlacedBets([]);
       setSelectedBets([]);
       setBetAmount("10");
-      
-      setTimeout(() => { // Reset game stage after 2s to allow for a new spin
+  
+      setTimeout(() => {
         setGameStage("selecting");
       }, 2000);
     }, 1000);
-
-
   };
+  
 
   const numbers = Array.from({ length: 36 }, (_, i) => i + 1); // 1 to 36
 
