@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard'; 
 import ManagePlayers from './pages/ManagePlayers';
 import AdminSpinHistory from "./pages/AdminSpinHistory";
+import Callback from './pages/Callback';
 import './App.css';
 import React from 'react';
 
@@ -15,6 +16,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/manage-players" element={<ManagePlayers />} />
       <Route path="/admin/spins" element={<AdminSpinHistory />} />
+      <Route path="/callback" element={<Callback />} />
     </Routes>
   );
 }

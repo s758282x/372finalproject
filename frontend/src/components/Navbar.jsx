@@ -1,9 +1,15 @@
 import React from 'react';
 import { AppBar, Toolbar, Button, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '@asgardeo/auth-react';
+import { useUser } from '../context/UserContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const { state, signIn, signOut } = useAuthContext();
+  const { user } = useUser();
+
+  const isLoggedIn = state?.isAuthenticated;
 
   return (
     <AppBar position="static" color="primary">
@@ -13,10 +19,30 @@ export default function Navbar() {
             Home
           </Button>
         </Box>
+
         <Box>
-          <Button color="inherit" onClick={() => navigate('/login')}>
-            Login
-          </Button>
+          {isLoggedIn ? (
+            <>
+              <Button color="inherit" onClick={() => navigate('/login')}>
+                Profile
+              </Button>
+              
+            </>
+          ) : (
+            <Button
+              color="inherit"
+              onClick={() => {
+                try {
+                  signIn();
+                } catch (err) {
+                  console.error("Sign-in error:", err);
+                }
+              }}
+            >
+              Login
+            </Button>
+          )}
+
           <Button color="inherit" onClick={() => navigate('/dashboard')}>
             Dashboard
           </Button>
@@ -26,8 +52,9 @@ export default function Navbar() {
           <Button color="inherit" onClick={() => navigate('/admin/spins')}>
             Spin History
           </Button>
-
-
+          <Button color="inherit" onClick={signOut}>
+                Logout
+          </Button>
         </Box>
       </Toolbar>
     </AppBar>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useUser } from "../context/UserContext";
 import BalanceDisplay from "../components/BalanceDisplay";
 import SpinHistory from "../components/SpinHistory";
 import SpinResult from "../components/SpinResult";
@@ -6,10 +7,11 @@ import BetControls from "../components/BetControls";
 import PlacedBets from "../components/PlacedBets";
 import BettingGrid from "../components/BettingGrid";
 import Navbar from "../components/Navbar";
-import { getNumberColor } from "../utils/NumberColorUtil";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 
-// Define payout multipliers for different bet types
+
 const PAYOUTS = {
   number: 35,
   dozen: 2,
@@ -20,27 +22,48 @@ const PAYOUTS = {
 };
 
 export default function Dashboard() {
-  // Game state variables
-  const [balance, setBalance] = useState(1000); // User's current balance
-  const [betAmount, setBetAmount] = useState("10"); // Default bet amount per selection
-  const [selectedBets, setSelectedBets] = useState([]); // Currently selected bets (before placement)
-  const [placedBets, setPlacedBets] = useState([]); // Bets that have been placed
-  const [gameStage, setGameStage] = useState("selecting"); // "selecting", "spinning", or "result"
-  const [spinResult, setSpinResult] = useState({ number: 0, color: "green" }); // Result of the last spin
-  const [isSpinning, setIsSpinning] = useState(false); // Whether the wheel is currently spinning
-  const [winningBets, setWinningBets] = useState([]); // Bets that won on the last spin (not used right now)
-  const [totalWinnings, setTotalWinnings] = useState(0); // Winnings from the last spin
-  const [spinHistory, setSpinHistory] = useState([]); // Last 10 spin results
-  const [showHistory, setShowHistory] = useState(false); // Toggle spin history visibility
+  const { user, setUser } = useUser();
+  console.log("Current user from context:", user);
+  const navigate = useNavigate();
 
-  // Helper to determine the color of a roulette number
+// Redirect to login if not authenticated
+useEffect(() => {
+  if (!user) {
+    navigate("/login");
+  }
+}, [user, navigate]);
+
+if (!user) return null;
+
+
+  const [betAmount, setBetAmount] = useState("10");
+  const [selectedBets, setSelectedBets] = useState([]);
+  const [placedBets, setPlacedBets] = useState([]);
+  const [gameStage, setGameStage] = useState("selecting");
+  const [spinResult, setSpinResult] = useState({ number: 0, color: "green" });
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [winningBets, setWinningBets] = useState([]);
+  const [totalWinnings, setTotalWinnings] = useState(0);
+  const [spinHistory, setSpinHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+
+  if (!user) return <div className="text-white p-4">Loading user...</div>;
+
+  const updateBalance = async (newBalance) => {
+    setUser((prev) => ({ ...prev, balance: newBalance }));
+    await fetch(`http://localhost:5001/api/users/${user.user_id}/balance`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ balance: newBalance }),
+    });
+  };
+
   const getNumberColor = (num) => {
     if (num === 0) return "green";
     const reds = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
     return reds.includes(num) ? "red" : "black";
   };
 
-  // Determine if a placed bet matches the spin result
   const isBetWinner = (bet, { number: num, color }) => {
     if (bet === num.toString()) return true;
     if (bet === "red" && color === "red") return true;
@@ -58,7 +81,6 @@ export default function Dashboard() {
     return false;
   };
 
-  // Return payout multiplier for a given bet
   const getPayoutMultiplier = (bet) => {
     if (!isNaN(Number(bet))) return PAYOUTS.number;
     if (["1st12", "2nd12", "3rd12"].includes(bet)) return PAYOUTS.dozen;
@@ -69,7 +91,6 @@ export default function Dashboard() {
     return 0;
   };
 
-  // Add or remove a bet from selectedBets
   const toggleBet = (bet) => {
     if (gameStage !== "selecting") return;
     setSelectedBets((curr) =>
@@ -77,19 +98,17 @@ export default function Dashboard() {
     );
   };
 
-  // Confirm selected bets and deduct balance
   const placeBets = () => {
     if (!selectedBets.length) return;
     const amt = parseInt(betAmount, 10);
     const total = amt * selectedBets.length;
 
-    if (total > balance) {
+    if (total > user.balance) {
       alert("Not enough balance");
       return;
     }
 
-    // Deduct and lock in the bets
-    setBalance((b) => b - total);
+    updateBalance(user.balance - total);
     setPlacedBets((prev) => [
       ...prev,
       ...selectedBets.map((b) => ({ bet: b, amount: amt })),
@@ -97,101 +116,89 @@ export default function Dashboard() {
     setSelectedBets([]);
   };
 
-  // Cancel all placed bets and refund
   const clearBets = () => {
     const refund = placedBets.reduce((sum, b) => sum + b.amount, 0);
-    setBalance((b) => b + refund);
+    updateBalance(user.balance + refund);
     setPlacedBets([]);
     setSelectedBets([]);
     setGameStage("selecting");
   };
 
-  // Edit bet amount and adjust balance accordingly
   const editBetAmount = (index, newAmount) => {
     const oldAmount = placedBets[index].amount;
     const updated = [...placedBets];
     updated[index].amount = newAmount;
-    setBalance((b) => b + (oldAmount - newAmount));
+    updateBalance(user.balance + (oldAmount - newAmount));
     setPlacedBets(updated);
   };
 
-  // Remove an individual bet and refund amount
   const removeBet = (index) => {
     const refund = placedBets[index].amount;
     const updated = [...placedBets];
     updated.splice(index, 1);
-    setBalance((b) => b + refund);
+    updateBalance(user.balance + refund);
     setPlacedBets(updated);
   };
 
-  // Main spin logic: simulate a wheel spin, evaluate winnings, update state
   const spinWheel = () => {
     if (!placedBets.length || isSpinning) return;
-  
+
     setGameStage("spinning");
     setIsSpinning(true);
-  
-    const totalBetAmount = placedBets.reduce((sum, bet) => sum + bet.amount, 0);
-  
+
     setTimeout(() => {
-      const num = Math.floor(Math.random() * 37); // 0 to 36
+      const num = Math.floor(Math.random() * 37);
       const color = getNumberColor(num);
       const result = { number: num, color };
       setSpinResult(result);
       setSpinHistory((h) => [result, ...h].slice(0, 10));
       setIsSpinning(false);
       setGameStage("result");
-  
-      // 👉 POST spin result to backend
+
       fetch("http://localhost:5001/api/spins", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ result: `${num}` }) // send number only, as a string
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ result: `${num}` }),
       })
-      .then(res => res.json())
-      .then(data => console.log("✅ Spin saved:", data))
-      .catch(err => console.error("❌ Error saving spin:", err));
-  
+        .then((res) => res.json())
+        .then((data) => console.log("✅ Spin saved:", data))
+        .catch((err) => console.error("❌ Error saving spin:", err));
+
       let win = 0;
       const winners = [];
-  
+
       placedBets.forEach((pb) => {
         if (isBetWinner(pb.bet, result)) {
           winners.push(pb.bet);
-          win += pb.amount * (getPayoutMultiplier(pb.bet) + 1); // include original bet
+          win += pb.amount * (getPayoutMultiplier(pb.bet) + 1);
         }
       });
-  
+
       setWinningBets(winners);
       setTotalWinnings(win);
-      setBalance((b) => b + win);
+      updateBalance(user.balance + win);
       setPlacedBets([]);
       setSelectedBets([]);
       setBetAmount("10");
-  
+
       setTimeout(() => {
         setGameStage("selecting");
       }, 2000);
     }, 1000);
   };
-  
 
-  const numbers = Array.from({ length: 36 }, (_, i) => i + 1); // 1 to 36
+  const numbers = Array.from({ length: 36 }, (_, i) => i + 1);
 
   return (
     <div className="flex flex-col min-h-screen bg-zinc-800">
       <Navbar />
-
       <div className="max-w-5xl mx-auto mt-4">
         <h1 className="text-3xl font-bold mb-6 text-center text-yellow-600 tracking-wide">
           Roulette Dashboard
         </h1>
 
-        {/* Balance and toggleable spin history */}
         <BalanceDisplay
-          balance={balance}
+          balance={user.balance}
           showHistory={showHistory}
           toggleHistory={() => setShowHistory((s) => !s)}
         />
@@ -199,7 +206,6 @@ export default function Dashboard() {
         {showHistory && <SpinHistory spinHistory={spinHistory} />}
 
         <div className="mb-8">
-          {/* Shows current spin result and winnings */}
           <SpinResult
             isSpinning={isSpinning}
             gameStage={gameStage}
@@ -208,26 +214,21 @@ export default function Dashboard() {
           />
         </div>
 
-        
-          {/* Main roulette number board */}
-          <BettingGrid
-            numbers={numbers}
-            toggleBet={toggleBet}
-            selectedBets={selectedBets}
-            getNumberColor={getNumberColor}
-          />
+        <BettingGrid
+          numbers={numbers}
+          toggleBet={toggleBet}
+          selectedBets={selectedBets}
+          getNumberColor={getNumberColor}
+        />
 
-          {/* Bet input and selection controls */}
-          <BetControls
-            betAmount={betAmount}
-            setBetAmount={setBetAmount}
-            selectedBets={selectedBets}
-            placeBets={placeBets}
-            clearSelectedBets={() => setSelectedBets([])}
-          />
-        
+        <BetControls
+          betAmount={betAmount}
+          setBetAmount={setBetAmount}
+          selectedBets={selectedBets}
+          placeBets={placeBets}
+          clearSelectedBets={() => setSelectedBets([])}
+        />
 
-        {/* Placed bets and actions (spin, remove, edit) */}
         {placedBets.length > 0 && (
           <div className="mb-8">
             <PlacedBets
