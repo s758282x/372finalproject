@@ -3,6 +3,9 @@ const cors = require("cors");
 const spinsRouter = require("./routes/spins");
 const authRouter = require("./routes/auth"); 
 const userRouter = require("./routes/users");
+const betsRouter = require("./routes/bets"); 
+
+
 
 
 
@@ -14,6 +17,7 @@ app.use(express.json());
 app.use("/api/spins", spinsRouter);
 app.use("/api/auth", authRouter); 
 app.use("/api/users", userRouter);
+app.use("/api/bets", betsRouter);
 
 
 // Test route

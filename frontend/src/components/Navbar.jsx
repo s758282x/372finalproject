@@ -23,10 +23,12 @@ export default function Navbar() {
         <Box>
           {isLoggedIn ? (
             <>
-              <Button color="inherit" onClick={() => navigate('/login')}>
+              <Button color="inherit" onClick={() => navigate('/profile')}>
                 Profile
               </Button>
-              
+              <Button color="inherit" onClick={signOut}>
+                Logout
+              </Button>
             </>
           ) : (
             <Button
@@ -51,9 +53,6 @@ export default function Navbar() {
           </Button>
           <Button color="inherit" onClick={() => navigate('/admin/spins')}>
             Spin History
-          </Button>
-          <Button color="inherit" onClick={signOut}>
-                Logout
           </Button>
         </Box>
       </Toolbar>

@@ -26,7 +26,7 @@ export default function Home() {
 
           <h2 className="text-2xl font-semibold mb-4">How to Play:</h2>
           <ul className="list-disc list-inside mb-6">
-            <li>This is a simplified American Roulette game: numbers 1–36, plus 0 and 00</li>
+            <li>This is a simplified American Roulette game: numbers 1–36, plus 0 </li>
             <li>You can bet on single numbers, colors, odds/evens, dozens, and more</li>
             <li>Click Spin to play after placing your bet</li>
             <li>If your bet wins, you receive a payout based on the type of bet</li>
