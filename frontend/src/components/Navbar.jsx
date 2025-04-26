@@ -26,6 +26,15 @@ export default function Navbar() {
               <Button color="inherit" onClick={() => navigate('/profile')}>
                 Profile
               </Button>
+              <Button color="inherit" onClick={() => navigate('/dashboard')}>
+                Dashboard
+              </Button>
+              <Button color="inherit" onClick={() => navigate('/manage-players')}>
+                Manage Players
+              </Button>
+              <Button color="inherit" onClick={() => navigate('/admin/spins')}>
+                Spin History
+              </Button>
               <Button color="inherit" onClick={signOut}>
                 Logout
               </Button>
@@ -37,23 +46,13 @@ export default function Navbar() {
                 try {
                   signIn();
                 } catch (err) {
-                  console.error("Sign-in error:", err);
+                  console.error('Sign-in error:', err);
                 }
               }}
             >
               Login
             </Button>
           )}
-
-          <Button color="inherit" onClick={() => navigate('/dashboard')}>
-            Dashboard
-          </Button>
-          <Button color="inherit" onClick={() => navigate('/manage-players')}>
-            Manage Players
-          </Button>
-          <Button color="inherit" onClick={() => navigate('/admin/spins')}>
-            Spin History
-          </Button>
         </Box>
       </Toolbar>
     </AppBar>

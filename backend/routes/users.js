@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
+const User = require("../models/User");
 
 // PUT /api/users/:id/balance
 router.put("/:id/balance", async (req, res) => {
@@ -8,7 +8,10 @@ router.put("/:id/balance", async (req, res) => {
   const { balance } = req.body;
 
   try {
-    await db.query("UPDATE users SET balance = $1 WHERE user_id = $2", [balance, id]);
+    await User.update(
+      { balance },                  // what to set
+      { where: { user_id: id } }    // where condition
+    );
     res.json({ success: true });
   } catch (err) {
     console.error("Balance update failed:", err);

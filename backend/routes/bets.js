@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db"); // assuming your db.js exports a pool or client
+const Bet = require("../models/Bet");
 
 // POST /api/bets - Save multiple bets
 router.post("/", async (req, res) => {
@@ -11,12 +11,15 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    const insertPromises = bets.map(bet => {
-      return db.query(
-        "INSERT INTO bets (user_id, bet_type, amount, spin_result) VALUES ($1, $2, $3, $4)",
-        [user_id, bet.bet, bet.amount, spin_result]
-      );
-    });
+    const insertPromises = bets.map((bet) =>
+      Bet.create({
+        user_id,
+        bet_type: bet.bet,
+        amount: bet.amount,
+        spin_result,
+        created_at: new Date(),
+      })
+    );
 
     await Promise.all(insertPromises);
 
@@ -32,11 +35,12 @@ router.get("/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const result = await db.query(
-      "SELECT * FROM bets WHERE user_id = $1 ORDER BY created_at DESC",
-      [userId]
-    );
-    res.json({ bets: result.rows });
+    const bets = await Bet.findAll({
+      where: { user_id: userId },
+      order: [["created_at", "DESC"]],
+    });
+
+    res.json({ bets });
   } catch (error) {
     console.error("Error fetching bets:", error);
     res.status(500).json({ error: "Failed to fetch bets." });

@@ -1,20 +1,22 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
+const Spin = require("../models/Spin");
 
 // POST /api/spins - Save a spin result
 router.post("/", async (req, res) => {
   console.log("Request body received:", req.body);
   const { result } = req.body;
 
-  if (!result) {
+  if (result === undefined || result === null) {
     return res.status(400).json({ error: "Spin result is required." });
   }
 
   try {
-    const insertQuery = "INSERT INTO spins (result) VALUES ($1) RETURNING *";
-    const { rows } = await db.query(insertQuery, [result]);
-    res.status(201).json({ spin: rows[0] });
+    const newSpin = await Spin.create({
+      result,
+      created_at: new Date(),
+    });
+    res.status(201).json({ spin: newSpin });
   } catch (err) {
     console.error("Error saving spin:", err);
     res.status(500).json({ error: "Database error." });
@@ -24,10 +26,11 @@ router.post("/", async (req, res) => {
 // GET /api/spins - Fetch recent spin results
 router.get("/", async (req, res) => {
   try {
-    const { rows } = await db.query(
-      "SELECT * FROM spins ORDER BY created_at DESC LIMIT 10"
-    );
-    res.json({ spins: rows });
+    const spins = await Spin.findAll({
+      order: [["created_at", "DESC"]],
+      limit: 50,
+    });
+    res.json({ spins });
   } catch (err) {
     console.error("Error fetching spins:", err);
     res.status(500).json({ error: "Database fetch error." });

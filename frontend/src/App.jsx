@@ -8,18 +8,48 @@ import Callback from './pages/Callback';
 import Profile from './pages/Profile';
 import './App.css';
 import React from 'react';
+import ProtectedRoute from './components/ProtectedRoute'; // << import it
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/manage-players" element={<ManagePlayers />} />
-      <Route path="/admin/spins" element={<AdminSpinHistory />} />
       <Route path="/callback" element={<Callback />} />
-      <Route path="/profile" element={<Profile />} />
 
+      {/* Protected Routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manage-players"
+        element={
+          <ProtectedRoute>
+            <ManagePlayers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/spins"
+        element={
+          <ProtectedRoute>
+            <AdminSpinHistory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

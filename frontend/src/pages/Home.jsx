@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext'; // <-- import the user context
 import Navbar from '../components/Navbar';
 
 export default function Home() {
   const navigate = useNavigate();
+  const { user } = useUser(); // <-- grab user from context
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -11,26 +13,26 @@ export default function Home() {
       <Navbar />
 
       {/* Page Content */}
-      <div className="flex-grow bg-gray-100 text-gray-900">
+      <div className="flex-grow bg-gray-100 text-gray-900 flex items-center justify-center">
         <div className="p-8 max-w-screen-md mx-auto">
-        <h1 className="title-h1">Welcome to Ant's Roulette Game </h1>
+          <h1 className="text-4xl font-bold text-center mb-8">Welcome to Ant's Roulette Game</h1>
 
           <div className="text-center mb-8">
             <button
               className="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600"
-              onClick={() => navigate('/login')}
+              onClick={() => navigate(user ? '/dashboard' : '/login')}
             >
-              Signup/Login to Play
+              {user ? 'Play' : 'Signup/Login to Play'}
             </button>
           </div>
 
           <h2 className="text-2xl font-semibold mb-4">How to Play:</h2>
           <ul className="list-disc list-inside mb-6">
-            <li>This is a simplified American Roulette game: numbers 1–36, plus 0 </li>
+            <li>This is a simplified American Roulette game: numbers 1–36, plus 0</li>
             <li>You can bet on single numbers, colors, odds/evens, dozens, and more</li>
             <li>Click Spin to play after placing your bet</li>
             <li>If your bet wins, you receive a payout based on the type of bet</li>
-            <li>Accounts will start at $1000. Try to run it up! You can restart at any time.</li>
+            <li>Accounts start at $1000. Try to run it up! You can restart at any time.</li>
           </ul>
 
           <h2 className="text-2xl font-semibold mb-4">Payouts:</h2>

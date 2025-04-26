@@ -6,32 +6,33 @@
 
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
+const User = require("../models/User");
 
 router.post("/sync", async (req, res) => {
-  const { username, name,} = req.body;
+  const { username, name } = req.body;
 
   if (!username) return res.status(400).json({ error: "Missing username" });
 
   try {
     // Check if user already exists by username
-    const existing = await db.query("SELECT * FROM users WHERE username = $1", [username]);
+    const existing = await User.findOne({ where: { username } });
 
-    if (existing.rows.length > 0) {
-      return res.json(existing.rows[0]);
+    if (existing) {
+      return res.json(existing);
     }
 
     // Parse name into first and last
     const [first_name, last_name] = name?.split(" ") ?? ["New", "User"];
 
     // Create new user with default balance
-    const result = await db.query(
-      "INSERT INTO users (first_name, last_name, username, balance) VALUES ($1, $2, $3, $4) RETURNING *",
-      [first_name, last_name || "", username, 1000]
-    );
-    
+    const newUser = await User.create({
+      first_name,
+      last_name: last_name || "",
+      username,
+      balance: 1000,
+    });
 
-    res.json(result.rows[0]);
+    res.json(newUser);
   } catch (err) {
     console.error("Error syncing user:", err);
     res.status(500).json({ error: "Server error" });
