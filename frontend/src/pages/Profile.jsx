@@ -7,16 +7,19 @@ import {
 } from "@mui/material";
 import CountUp from "react-countup";
 
+// ✅ Define API_URL locally at the top
+const API_URL = process.env.NODE_ENV === "production"
+  ? "https://finalback-ejdffjg2fjgedkde.centralus-01.azurewebsites.net/api"
+  : "http://localhost:5001/api";
 
 export default function Profile() {
-    
   const { user, setUser } = useUser();
   const [bets, setBets] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     if (user) {
-      fetch(`http://localhost:5001/api/bets/${user.user_id}`)
+      fetch(`${API_URL}/bets/${user.user_id}`)
         .then((res) => res.json())
         .then((data) => {
           setBets(data.bets || []);
@@ -38,7 +41,7 @@ export default function Profile() {
 
   const resetBalance = async () => {
     try {
-      await fetch(`http://localhost:5001/api/users/${user.user_id}/balance`, {
+      await fetch(`${API_URL}/users/${user.user_id}/balance`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ balance: 1000 }),
@@ -82,42 +85,38 @@ export default function Profile() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-  {/* CARD 1 */}
-  <div className="p-4 bg-white rounded shadow text-center">
-    <h3 className="text-lg font-semibold">Current Balance</h3>
-    <p className="text-xl">
-    <CountUp end={Number(user.balance) || 0} decimals={2} prefix="$" />
+          {/* CARD 1 */}
+          <div className="p-4 bg-white rounded shadow text-center">
+            <h3 className="text-lg font-semibold">Current Balance</h3>
+            <p className="text-xl">
+              <CountUp end={Number(user.balance) || 0} decimals={2} prefix="$" />
+            </p>
+          </div>
 
-    </p>
-  </div>
+          {/* CARD 2 */}
+          <div className="p-4 bg-white rounded shadow text-center">
+            <h3 className="text-lg font-semibold">Total Wagered</h3>
+            <p className="text-xl">
+              <CountUp end={totalWagered} decimals={2} prefix="$" />
+            </p>
+          </div>
 
-  {/* CARD 2 */}
-  <div className="p-4 bg-white rounded shadow text-center">
-    <h3 className="text-lg font-semibold">Total Wagered</h3>
-    <p className="text-xl">
-      <CountUp end={totalWagered} decimals={2} prefix="$" />
-    </p>
-  </div>
+          {/* CARD 3 */}
+          <div className="p-4 bg-white rounded shadow text-center">
+            <h3 className="text-lg font-semibold">Total Winnings</h3>
+            <p className="text-xl">
+              <CountUp end={totalWinnings} decimals={2} prefix="$" />
+            </p>
+          </div>
 
-  {/* CARD 3 */}
-  <div className="p-4 bg-white rounded shadow text-center">
-    <h3 className="text-lg font-semibold">Total Winnings</h3>
-    <p className="text-xl">
-      <CountUp end={totalWinnings} decimals={2} prefix="$" />
-    </p>
-  </div>
-
-  {/* CARD 4 */}
-  <div className="p-4 bg-white rounded shadow text-center">
-    <h3 className="text-lg font-semibold">Net Profit</h3>
-    <p className={`text-xl ${netProfit >= 0 ? "text-green-600" : "text-red-600"}`}>
-      <CountUp end={netProfit} decimals={2} prefix="$" />
-    </p>
-  </div>
-</div>
-
-
-
+          {/* CARD 4 */}
+          <div className="p-4 bg-white rounded shadow text-center">
+            <h3 className="text-lg font-semibold">Net Profit</h3>
+            <p className={`text-xl ${netProfit >= 0 ? "text-green-600" : "text-red-600"}`}>
+              <CountUp end={netProfit} decimals={2} prefix="$" />
+            </p>
+          </div>
+        </div>
 
         <div className="flex justify-center mb-8">
           <Button variant="contained" color="error" onClick={resetBalance}>
