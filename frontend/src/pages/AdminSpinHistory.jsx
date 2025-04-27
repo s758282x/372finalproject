@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar"; // Ensure the correct path to Navbar
 import { getNumberColor } from "../utils/NumberColorUtil"; // Adjust path if needed
+import { Button } from "@mui/material";
+import axios from "axios"; // <-- Added axios import
 
 export default function AdminSpinHistory() {
   const [spins, setSpins] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingOdds, setLoadingOdds] = useState(false);
+  const [oddsReport, setOddsReport] = useState(""); 
 
   useEffect(() => {
     fetch("http://localhost:5001/api/spins")
@@ -19,13 +23,44 @@ export default function AdminSpinHistory() {
       });
   }, []);
 
+  const getOddsReport = async () => {
+    try {
+      setLoadingOdds(true);
+      const res = await axios.get("http://localhost:5001/api/ai/odds-report");
+      console.log(res.data.response); // <- you should now see this
+      setOddsReport(res.data.response);
+    } catch (err) {
+      console.error("Error fetching odds report:", err);
+    } finally {
+      setLoadingOdds(false);
+    }
+  };
+  
+
   return (
     <div className="flex flex-col min-h-screen bg-zinc-900 text-white">
-      {/* Place Navbar at the top of the page */}
       <Navbar />
 
       <div className="p-8">
         <h1 className="text-3xl font-bold mb-6 text-yellow-500">Admin: Spin History</h1>
+
+        <div className="text-center mb-8">
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={getOddsReport}
+          >
+            Generate Spin Odds Report
+          </Button>
+        </div>
+
+        {oddsReport && (
+          <div className="text-center text-white mt-4 px-4">
+            <h3 className="text-lg font-semibold mb-2">AI Odds Report:</h3>
+            <p>{oddsReport}</p>
+          </div>
+        )}
 
         {loading ? (
           <p>Loading spin history...</p>

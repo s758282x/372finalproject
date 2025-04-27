@@ -8,12 +8,14 @@ import Callback from './pages/Callback';
 import Profile from './pages/Profile';
 import './App.css';
 import React from 'react';
-import ProtectedRoute from './components/ProtectedRoute'; // << import it
+import ProtectedRoute from './components/ProtectedRoute'; 
+import Blogs from './pages/Blogs'; 
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/blogs" element={<Blogs />} />
       <Route path="/login" element={<Login />} />
       <Route path="/callback" element={<Callback />} />
 

@@ -4,10 +4,8 @@ const spinsRouter = require("./routes/spins");
 const authRouter = require("./routes/auth"); 
 const userRouter = require("./routes/users");
 const betsRouter = require("./routes/bets"); 
-
-
-
-
+const aiRouter = require("./routes/ai"); 
+const blogsRouter = require("./routes/blogs");
 
 const app = express();
 app.use(cors());
@@ -18,6 +16,9 @@ app.use("/api/spins", spinsRouter);
 app.use("/api/auth", authRouter); 
 app.use("/api/users", userRouter);
 app.use("/api/bets", betsRouter);
+app.use("/api/ai", aiRouter); 
+app.use("/api/blogs", blogsRouter);
+
 
 
 // Test route

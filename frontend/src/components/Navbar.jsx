@@ -18,6 +18,9 @@ export default function Navbar() {
           <Button color="inherit" onClick={() => navigate('/')}>
             Home
           </Button>
+          <Button color="inherit" onClick={() => navigate('/blogs')}>
+            Blogs
+          </Button> {/* ✅ Always visible */}
         </Box>
 
         <Box>

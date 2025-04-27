@@ -9,7 +9,10 @@ import BetControls from "../components/BetControls";
 import PlacedBets from "../components/PlacedBets";
 import BettingGrid from "../components/BettingGrid";
 import { PAYOUTS, getPayoutMultiplier, getNumberColor, didWin } from "../utils/RouletteRules";
-import { Button } from "@mui/material"; // <-- MUI Button import
+import { Button } from "@mui/material";
+import axios from "axios"; // <-- Added axios import
+
+
 
 export default function Dashboard() {
   const { user, setUser } = useUser();
@@ -25,6 +28,8 @@ export default function Dashboard() {
   const [totalWinnings, setTotalWinnings] = useState(0);
   const [spinHistory, setSpinHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [quote, setQuote] = useState("");
+  const [loadingQuote, setLoadingQuote] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -42,6 +47,20 @@ export default function Dashboard() {
       body: JSON.stringify({ balance: newBalance }),
     });
   };
+
+  const getInspirationalQuote = async () => {
+    try {
+      setLoadingQuote(true);
+      const res = await axios.get("http://localhost:5001/api/ai/inspirational-quote");
+      console.log(res.data.response); // <- you should now see this
+      setQuote(res.data.response);
+    } catch (err) {
+      console.error("Error fetching inspirational quote:", err);
+    } finally {
+      setLoadingQuote(false);
+    }
+  };
+  
 
   const toggleBet = (bet) => {
     if (gameStage !== "selecting") return;
@@ -163,20 +182,38 @@ export default function Dashboard() {
         </h1>
 
         <div className="text-3xl text-green-600 font-bold text-center mb-4">
-  Balance: ${parseFloat(user?.balance ?? 0).toFixed(2)}
-</div>
+          Balance: ${parseFloat(user?.balance ?? 0).toFixed(2)}
+        </div>
 
-<div className="text-center mb-8">
-  <Button
-    variant="contained"
-    color="primary"
-    size="small"
-    onClick={() => setShowHistory((s) => !s)}
-  >
-    {showHistory ? "Hide Spin History" : "Show Spin History"}
-  </Button>
-</div>
+        <div className="text-center mb-8">
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => setShowHistory((s) => !s)}
+          >
+            {showHistory ? "Hide Spin History" : "Show Spin History"}
+          </Button>
+        </div>
 
+        {/* Inspirational Quote Button */}
+        <div className="text-center mb-8">
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={getInspirationalQuote}
+          >
+            Get Inspirational Gambling Advice
+          </Button>
+        </div>
+
+        {quote && (
+          <div className="text-center text-white mt-4 px-4">
+            <h3 className="text-lg font-semibold mb-2">Your Inspirational Quote:</h3>
+            <p>"{quote}"</p>
+          </div>
+        )}
 
         {showHistory && <SpinHistory spinHistory={spinHistory} />}
 
