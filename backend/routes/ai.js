@@ -30,7 +30,7 @@ async function askOpenAI(prompt) {
 
 // Inspirational Quote
 router.get("/inspirational-quote", async (req, res) => {
-  const prompt = "Give me an inspirational quote related to gambling, taking risks, or luck. Make it positive and motivational.";
+  const prompt = `Give me an inspirational quote related to gambling, taking risks, or luck. Make it positive and motivational.`;
   
   try {
     const response = await askOpenAI(prompt);
