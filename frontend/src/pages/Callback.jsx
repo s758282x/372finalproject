@@ -3,14 +3,22 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Callback() {
-  const { state } = useAuthContext();
+  const { signIn, state } = useAuthContext();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (state?.isAuthenticated) {
-      navigate("/dashboard"); // or wherever you want to send them
-    }
-  }, [state, navigate]);
+    // First complete the authentication
+    signIn()
+      .then(() => {
+        // After successful sign-in, redirect
+        if (state?.isAuthenticated) {
+          navigate("/dashboard");
+        }
+      })
+      .catch((error) => {
+        console.error("Error during sign-in:", error);
+      });
+  }, []);
 
   return <div className="text-white p-4">Logging you in...</div>;
 }
