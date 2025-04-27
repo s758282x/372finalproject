@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar"; // Ensure the correct path to Navbar
 import { getNumberColor } from "../utils/NumberColorUtil"; // Adjust path if needed
 import { Button } from "@mui/material";
-import axios from "axios"; // <-- Added axios import
+import axios from "axios";
+import API_URL from "../api"; // ✅ Import global API_URL
 
 export default function AdminSpinHistory() {
   const [spins, setSpins] = useState([]);
@@ -11,7 +12,7 @@ export default function AdminSpinHistory() {
   const [oddsReport, setOddsReport] = useState(""); 
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/spins")
+    fetch(`${API_URL}/spins`) // ✅ Use API_URL here
       .then((res) => res.json())
       .then((data) => {
         setSpins(data.spins || []);
@@ -26,8 +27,8 @@ export default function AdminSpinHistory() {
   const getOddsReport = async () => {
     try {
       setLoadingOdds(true);
-      const res = await axios.get("http://localhost:5001/api/ai/odds-report");
-      console.log(res.data.response); // <- you should now see this
+      const res = await axios.get(`${API_URL}/ai/odds-report`); // ✅ Use API_URL here too
+      console.log(res.data.response);
       setOddsReport(res.data.response);
     } catch (err) {
       console.error("Error fetching odds report:", err);
@@ -36,7 +37,6 @@ export default function AdminSpinHistory() {
     }
   };
   
-
   return (
     <div className="flex flex-col min-h-screen bg-zinc-900 text-white">
       <Navbar />
