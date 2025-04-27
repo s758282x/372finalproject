@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const  Blog  = require("../models/Blog"); // ✅ Import Blog model
+const  Blog  = require("../models/Blog"); // 
 
 // Get all blogs
 router.get("/", async (req, res) => {
