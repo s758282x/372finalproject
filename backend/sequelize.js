@@ -1,14 +1,19 @@
-// sequelize.js
 const { Sequelize } = require('sequelize');
 
-// Create the Sequelize instance
+// fallback values for local dev (optional, but good for now)
+const dbName = process.env.DB_NAME || 'postgres';
+const dbUser = process.env.DB_USER || 'postgres.eeatmwmiruleeolotiqn';
+const dbPassword = process.env.DB_PASSWORD || 'your-real-password';
+const dbHost = process.env.DB_HOST || 'aws-0-us-east-1.pooler.supabase.com';
+const dbPort = process.env.DB_PORT || 6543; // default postgres port
+
 const sequelize = new Sequelize(
-  'postgres', // database name
-  'postgres.eeatmwmiruleeolotiqn', // username
-  'password', // your real password
+  dbName,
+  dbUser,
+  dbPassword,
   {
-    host: 'aws-0-us-east-1.pooler.supabase.com', // pooled Supabase host
-    port: 6543, // pooled Supabase port
+    host: dbHost,
+    port: dbPort,
     dialect: 'postgres',
     dialectOptions: {
       ssl: {
@@ -16,11 +21,10 @@ const sequelize = new Sequelize(
         rejectUnauthorized: false,
       },
     },
-    logging: console.log, // optional: shows SQL queries and connection logs
+    logging: console.log,
   }
 );
 
-// ✅ Test connection immediately on server boot
 sequelize.authenticate()
   .then(() => {
     console.log('✅ Database connection established successfully.');
