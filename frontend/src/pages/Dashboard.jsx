@@ -10,9 +10,12 @@ import PlacedBets from "../components/PlacedBets";
 import BettingGrid from "../components/BettingGrid";
 import { PAYOUTS, getPayoutMultiplier, getNumberColor, didWin } from "../utils/RouletteRules";
 import { Button } from "@mui/material";
-import axios from "axios"; // <-- Added axios import
+import axios from "axios";
 
-
+// ✅ Define API_URL locally at the top
+const API_URL = process.env.NODE_ENV === "production"
+  ? "https://finalback-ejdffjg2fjgedkde.centralus-01.azurewebsites.net/api"
+  : "http://localhost:5001/api";
 
 export default function Dashboard() {
   const { user, setUser } = useUser();
@@ -41,7 +44,7 @@ export default function Dashboard() {
 
   const updateBalance = async (newBalance) => {
     setUser((prev) => ({ ...prev, balance: newBalance }));
-    await fetch(`http://localhost:5001/api/users/${user.user_id}/balance`, {
+    await fetch(`${API_URL}/users/${user.user_id}/balance`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ balance: newBalance }),
@@ -51,8 +54,8 @@ export default function Dashboard() {
   const getInspirationalQuote = async () => {
     try {
       setLoadingQuote(true);
-      const res = await axios.get("http://localhost:5001/api/ai/inspirational-quote");
-      console.log(res.data.response); // <- you should now see this
+      const res = await axios.get(`${API_URL}/ai/inspirational-quote`);
+      console.log(res.data.response);
       setQuote(res.data.response);
     } catch (err) {
       console.error("Error fetching inspirational quote:", err);
@@ -60,7 +63,6 @@ export default function Dashboard() {
       setLoadingQuote(false);
     }
   };
-  
 
   const toggleBet = (bet) => {
     if (gameStage !== "selecting") return;
@@ -126,7 +128,7 @@ export default function Dashboard() {
       setIsSpinning(false);
       setGameStage("result");
 
-      fetch("http://localhost:5001/api/spins", {
+      fetch(`${API_URL}/spins`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ result: num }),
@@ -135,7 +137,7 @@ export default function Dashboard() {
         .then((data) => console.log("✅ Spin saved:", data))
         .catch((err) => console.error("❌ Error saving spin:", err));
 
-      fetch("http://localhost:5001/api/bets", {
+      fetch(`${API_URL}/bets`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
