@@ -1,8 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuthContext } from "@asgardeo/auth-react";
-import API_URL from "../api"; // ✅ Add this import at the top
 
 const UserContext = createContext();
+
+// ✅ Local API_URL defined at top
+const API_URL = process.env.NODE_ENV === "production"
+  ? "https://finalback-ejdffjg2fjgedkde.centralus-01.azurewebsites.net/api"
+  : "http://localhost:5001/api";
 
 export function UserProvider({ children }) {
   const { state } = useAuthContext();
@@ -14,7 +18,7 @@ export function UserProvider({ children }) {
 
       if (state?.isAuthenticated && state?.username) {
         try {
-          const res = await fetch(`${API_URL}/auth/sync`, {  // ✅ Use API_URL here
+          const res = await fetch(`${API_URL}/auth/sync`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
