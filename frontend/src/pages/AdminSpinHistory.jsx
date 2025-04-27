@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/Navbar"; // Ensure the correct path to Navbar
-import { getNumberColor } from "../utils/NumberColorUtil"; // Adjust path if needed
+import Navbar from "../components/Navbar"; 
+import { getNumberColor } from "../utils/NumberColorUtil"; 
 import { Button } from "@mui/material";
 import axios from "axios";
-import API_URL from "../api"; // ✅ Import global API_URL
+
+// ✅ Local API_URL defined at top
+const API_URL = process.env.NODE_ENV === "production"
+  ? "https://finalback-ejdffjg2fjgedkde.centralus-01.azurewebsites.net/api"
+  : "http://localhost:5001/api";
 
 export default function AdminSpinHistory() {
   const [spins, setSpins] = useState([]);
@@ -12,7 +16,7 @@ export default function AdminSpinHistory() {
   const [oddsReport, setOddsReport] = useState(""); 
 
   useEffect(() => {
-    fetch(`${API_URL}/spins`) // ✅ Use API_URL here
+    fetch(`${API_URL}/spins`)
       .then((res) => res.json())
       .then((data) => {
         setSpins(data.spins || []);
@@ -27,7 +31,7 @@ export default function AdminSpinHistory() {
   const getOddsReport = async () => {
     try {
       setLoadingOdds(true);
-      const res = await axios.get(`${API_URL}/ai/odds-report`); // ✅ Use API_URL here too
+      const res = await axios.get(`${API_URL}/ai/odds-report`);
       console.log(res.data.response);
       setOddsReport(res.data.response);
     } catch (err) {
