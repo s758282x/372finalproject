@@ -4,11 +4,12 @@ const  Blog  = require("../models/Blog"); // ✅ Import Blog model
 
 // Get all blogs
 router.get("/", async (req, res) => {
+  console.log("HIT GET /api/blogs");
   try {
     const blogs = await Blog.findAll({ order: [["blog_id", "DESC"]] });
     res.json({ blogs });
   } catch (err) {
-    console.error(err);
+    console.error("Error fetching blogs:", err);
     res.status(500).json({ error: "Failed to fetch blogs" });
   }
 });
