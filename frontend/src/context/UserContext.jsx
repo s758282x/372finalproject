@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAuthContext } from "@asgardeo/auth-react";
+import API_URL from "../api"; // ✅ Add this import at the top
 
 const UserContext = createContext();
 
@@ -13,7 +14,7 @@ export function UserProvider({ children }) {
 
       if (state?.isAuthenticated && state?.username) {
         try {
-          const res = await fetch("http://localhost:5001/api/auth/sync", {
+          const res = await fetch(`${API_URL}/auth/sync`, {  // ✅ Use API_URL here
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
