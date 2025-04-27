@@ -4,6 +4,11 @@ import Navbar from "../components/Navbar";
 import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Container, Typography, Card, CardContent, CardActions } from "@mui/material";
 import axios from "axios";
 
+// ✅ Define API_URL locally at the top
+const API_URL = process.env.NODE_ENV === "production"
+  ? "https://finalback-ejdffjg2fjgedkde.centralus-01.azurewebsites.net/api"
+  : "http://localhost:5001/api";
+
 export default function Blogs() {
   const { user } = useUser();
   const [blogs, setBlogs] = useState([]);
@@ -17,7 +22,7 @@ export default function Blogs() {
 
   const fetchBlogs = async () => {
     try {
-      const res = await axios.get("http://localhost:5001/api/blogs");
+      const res = await axios.get(`${API_URL}/blogs`);
       setBlogs(res.data.blogs || []);
     } catch (err) {
       console.error("Error fetching blogs:", err);
@@ -43,12 +48,12 @@ export default function Blogs() {
   const handleSave = async () => {
     try {
       if (editMode) {
-        await axios.put(`http://localhost:5001/api/blogs/${blogData.blog_id}`, {
+        await axios.put(`${API_URL}/blogs/${blogData.blog_id}`, {
           title: blogData.title,
           content: blogData.content,
         });
       } else {
-        await axios.post("http://localhost:5001/api/blogs", {
+        await axios.post(`${API_URL}/blogs`, {
           title: blogData.title,
           content: blogData.content,
           user_id: user.user_id,
@@ -64,7 +69,7 @@ export default function Blogs() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this blog?")) return;
     try {
-      await axios.delete(`http://localhost:5001/api/blogs/${id}`);
+      await axios.delete(`${API_URL}/blogs/${id}`);
       fetchBlogs();
     } catch (err) {
       console.error("Error deleting blog:", err);
