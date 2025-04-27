@@ -1,10 +1,13 @@
+require("dotenv").config(); 
+
 const express = require("express");
 const router = express.Router();
-const { Bet } = require("../models"); // ✅ Import Sequelize models
+const { Bet } = require("../models"); 
 const axios = require("axios");
-require("dotenv").config();
+
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
 
 // Helper function to call OpenAI
 async function askOpenAI(prompt) {
